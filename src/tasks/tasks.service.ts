@@ -1,26 +1,39 @@
-import { Injectable } from '@nestjs/common';
-import { CreateTaskDto } from './dto/create-task.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from 'src/config/database/prisma.service';
+import { CreateTaskRequestDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { Task } from '@prisma/client';
 
 @Injectable()
 export class TasksService {
-  create(createTaskDto: CreateTaskDto) {
-    return 'This action adds a new task';
+  constructor(private readonly taskRepository: PrismaService) {}
+
+  async createTask(payload: CreateTaskRequestDto): Promise<Task> {
+    return this.taskRepository.task.create({
+      data: { name: payload.name, status: payload.status },
+    });
   }
 
-  findAll() {
-    return `This action returns all tasks`;
+  async getTasks(): Promise<Task[]> {
+    return this.taskRepository.task.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} task`;
+  async updateTasks(updateTaskDto: UpdateTaskDto) {
+    return;
   }
 
-  update(id: number, updateTaskDto: UpdateTaskDto) {
-    return `This action updates a #${id} task`;
-  }
+  async deleteTasks(id: number): Promise<void> {
+    const taskAlreadyExist = await this.taskRepository.task.findUnique({
+      where: { id: +id },
+    });
 
-  remove(id: number) {
-    return `This action removes a #${id} task`;
+    if (!taskAlreadyExist) {
+      throw new NotFoundException({
+        code: 404,
+        message: 'Task not found',
+      });
+    }
+
+    await this.taskRepository.task.delete({ where: { id: +id } });
   }
 }
