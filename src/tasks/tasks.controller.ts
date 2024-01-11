@@ -1,16 +1,16 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Post,
+  Put,
 } from '@nestjs/common';
-import { TasksService } from './tasks.service';
+import { Task } from '@prisma/client';
 import { CreateTaskRequestDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
-import { Task } from '@prisma/client';
+import { TasksService } from './tasks.service';
 
 @Controller('tasks')
 export class TasksController {
@@ -22,17 +22,17 @@ export class TasksController {
   }
 
   @Get()
-  findAll(): Promise<Task[]> {
-    return this.tasksService.getTasks();
+  getAllTaks(): Promise<Task[]> {
+    return this.tasksService.getAllTasks();
   }
 
-  @Patch()
-  update(@Body() updateTaskDto: UpdateTaskDto) {
-    return this.tasksService.updateTasks(updateTaskDto);
+  @Put()
+  update(@Body() updateTaskDto: UpdateTaskDto): Promise<Task> {
+    return this.tasksService.updateTask(updateTaskDto);
   }
 
   @Delete(':id')
-  deleteTasks(@Param('id') id: string): Promise<void> {
-    return this.tasksService.deleteTasks(+id);
+  deleteTask(@Param('id') id: string): Promise<void> {
+    return this.tasksService.deleteTask(+id);
   }
 }
