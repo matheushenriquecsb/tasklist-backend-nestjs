@@ -10,19 +10,38 @@ export class TasksService {
 
   async createTask(payload: CreateTaskRequestDto): Promise<Task> {
     return this.taskRepository.task.create({
-      data: { name: payload.name, status: payload.status },
+      data: { name: payload.name },
     });
   }
 
-  async getTasks(): Promise<Task[]> {
+  async getAllTasks(): Promise<Task[]> {
     return this.taskRepository.task.findMany();
   }
 
-  async updateTasks(updateTaskDto: UpdateTaskDto) {
-    return;
+  async updateTask(payload: UpdateTaskDto) {
+    const { name, status, id } = payload;
+
+    const taskAlreadyExist = await this.taskRepository.task.findUnique({
+      where: { id },
+    });
+
+    if (!taskAlreadyExist) {
+      throw new NotFoundException({
+        code: 404,
+        message: 'Task not found',
+      });
+    }
+
+    return this.taskRepository.task.update({
+      where: { id },
+      data: {
+        name,
+        status,
+      },
+    });
   }
 
-  async deleteTasks(id: number): Promise<void> {
+  async deleteTask(id: number): Promise<void> {
     const taskAlreadyExist = await this.taskRepository.task.findUnique({
       where: { id: +id },
     });
